@@ -1,5 +1,10 @@
 # ChangeLog - Aliyun OSS SDK for PHP
 
+
+ 对象 | 新增方法 | 说明
+--- | ---|---
+ object | imgSaveAs | 图片处理持久化
+
 ## v2.3.1 / 2019-011-15
 
 * translate chinese comments into english

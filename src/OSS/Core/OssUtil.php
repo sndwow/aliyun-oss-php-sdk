@@ -38,7 +38,7 @@ class OssUtil
     }
 
     /**
-     * Html encoding '<', '>', '&', '\', '"' in subject parameter. 
+     * Html encoding '<', '>', '&', '\', '"' in subject parameter.
      *
      * @param string $subject
      * @return string
@@ -330,7 +330,7 @@ BBB;
 
     /**
      * Encodes the file path from GBK to UTF-8.
-     * The default encoding in Windows is GBK. 
+     * The default encoding in Windows is GBK.
      * And if the file path is in Chinese, the file would not be found without the transcoding to UTF-8.
      *
      * @param $file_path
@@ -497,5 +497,17 @@ BBB;
         } else {
             throw new OssException("Unrecognized encoding type: " . $encoding);
         }
+    }
+    
+    /**
+     * 获取安全的base64
+     *
+     * @param string $str
+     *
+     * @return string
+     */
+    public static function safeBase64($str){
+        $str = str_replace('+', '-', base64_encode($str));
+        return str_replace('/', '_', $str);
     }
 }

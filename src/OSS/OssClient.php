@@ -65,7 +65,7 @@ class OssClient
      *
      * There're a few different ways to create an OssClient object:
      * 1. Most common one from access Id, access Key and the endpoint: $ossClient = new OssClient($id, $key, $endpoint)
-     * 2. If the endpoint is the CName (such as www.testoss.com, make sure it's CName binded in the OSS console), 
+     * 2. If the endpoint is the CName (such as www.testoss.com, make sure it's CName binded in the OSS console),
      *    uses $ossClient = new OssClient($id, $key, $endpoint, true)
      * 3. If using Alicloud's security token service (STS), then the AccessKeyId, AccessKeySecret and STS token are all got from STS.
      * Use this: $ossClient = new OssClient($id, $key, $endpoint, false, $token)
@@ -615,7 +615,7 @@ class OssClient
      * @param string channelStatus $channelStatus enabled or disabled
      * @param array $options
      * @throws OssException
-     * @return null 
+     * @return null
      */
     public function putLiveChannelStatus($bucket, $channelName, $channelStatus, $options = NULL)
     {
@@ -731,7 +731,7 @@ class OssClient
      * Creates a play list file for the LiveChannel
      *
      * @param string $bucket bucket name
-     * @param string channelName $channelName 
+     * @param string channelName $channelName
      * @param string $playlistName The playlist name, must end with ".m3u8".
      * @param array $setTime  startTime and EndTime in unix time. No more than 1 day.
      * @throws OssException
@@ -812,8 +812,8 @@ class OssClient
 
     /**
      * Precheck the CORS request. Before sending a CORS request, a preflight request (OPTIONS) is sent with the specific origin.
-     * HTTP METHOD and headers information are sent to OSS as well for evaluating if the CORS request is allowed. 
-     * 
+     * HTTP METHOD and headers information are sent to OSS as well for evaluating if the CORS request is allowed.
+     *
      * Note: OSS could enable the CORS on the bucket by calling putBucketCors. Once CORS is enabled, the OSS could evaluate accordingto the preflight request.
      *
      * @param string $bucket bucket name
@@ -907,7 +907,7 @@ class OssClient
 
     /**
      * Sets a bucket's referer, which has a whitelist of referrer and specifies if empty referer is allowed.
-     * Checks out API document for more details about "Bucket Referer" 
+     * Checks out API document for more details about "Bucket Referer"
      *
      * @param string $bucket bucket name
      * @param RefererConfig $refererConfig
@@ -931,7 +931,7 @@ class OssClient
 
     /**
      * Gets the bucket's Referer
-     * Checks out API document for more details about "Bucket Referer" 
+     * Checks out API document for more details about "Bucket Referer"
      *
      * @param string $bucket bucket name
      * @param array $options
@@ -1097,7 +1097,7 @@ class OssClient
         } else {
             $result = new PutSetDeleteResult($response);
         }
-            
+        
         return $result->getData();
     }
 
@@ -1264,7 +1264,48 @@ class OssClient
         $result = new AppendResult($response);
         return $result->getData();
     }
-
+    
+    /**
+     * 图片持久化
+     *
+     * @param string $bucket
+     * @param string $object 当前图片文件
+     * @param string $process 需要执行的图片格式化命令 x-oss-process 中的 image部分
+     * @param string $saveToObject 另存为该文件
+     * @param string $saveToBucket 存储的bucket，默认是当前bucket（只能存储于同一区域的bucket）
+     *
+     * @return array
+     * @throws OssException
+     */
+    public function imgSaveAs($bucket, $object, $process, $saveToObject, $saveToBucket = null)
+    {
+        $saveStr = '|sys/saveas,o_'.OssUtil::safeBase64($saveToObject);
+        if ($saveToBucket) {
+            $saveStr .= ',b_'.OssUtil::safeBase64($saveToObject);
+        }
+        $options = [
+            self::OSS_BUCKET => $bucket,
+            self::OSS_METHOD => self::OSS_HTTP_POST,
+            self::OSS_OBJECT => $object,
+            self::OSS_SUB_RESOURCE => self::OSS_PROCESS,
+            self::OSS_CONTENT => self::OSS_PROCESS.'='.$process.$saveStr,
+        ];
+    
+        $this->precheckCommon($bucket, $object, $options);
+        if ($saveToBucket) {
+            $this->precheckCommon($saveToBucket, $saveToObject, $options);
+        }
+    
+        $response = $this->auth($options);
+        $result = new BodyResult($response);
+        $arr = json_decode($result->getData(), true);
+    
+        return [
+            'fileSize' => $arr['fileSize'],
+            'object' => $arr['object'],
+        ];
+    }
+    
     /**
      * Copy from an existing OSS object to another OSS object. If the target object exists already, it will be overwritten.
      *
@@ -1975,7 +2016,7 @@ class OssClient
     }
 
     /**
-     * Gets value of the specified key from the options 
+     * Gets value of the specified key from the options
      *
      * @param array $options
      * @param string $key
@@ -2473,7 +2514,7 @@ class OssClient
 
         foreach($queryStringParams as $params)
         {
-             $queryStringSorted .= $params . '&';    
+             $queryStringSorted .= $params . '&';
         }
 
         $queryStringSorted = substr($queryStringSorted, 0, -1);
